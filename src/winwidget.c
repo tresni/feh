@@ -530,6 +530,24 @@ void winwidget_render_image(winwidget winwid, int resize, int force_alias)
 	if ((winwid->zoom != 1.0 || winwid->has_rotated) && !force_alias && !winwid->force_aliasing)
 		antialias = 1;
 
+	temp = gib_imlib_clone_image(winwid->im);
+	if (temp != NULL) {
+		gib_imlib_image_blur(temp, 20);
+		if (winwid->has_rotated)
+			gib_imlib_render_image_part_on_drawable_at_size_with_rotation
+				(winwid->bg_pmap, temp, sx, sy, sw, sh, dx, dy, dw, dh,
+				winwid->im_angle, 1, 1, antialias);
+		else
+			gib_imlib_render_image_part_on_drawable_at_size(winwid->bg_pmap,
+									temp,
+									sx, sy, sw,
+									sh, dx, dy,
+									dw, dh, 1,
+									gib_imlib_image_has_alpha(temp),
+									antialias);
+		gib_imlib_free_image_and_decache(temp);
+	}
+
 	D(("winwidget_render(): winwid->im_angle = %f\n", winwid->im_angle));
 	if (winwid->has_rotated)
 		gib_imlib_render_image_part_on_drawable_at_size_with_rotation
